@@ -25,6 +25,12 @@ chrome.runtime.onInstalled.addListener(() => {
     title: "How to use?",
     contexts: ["action"],
   });
+
+  chrome.contextMenus.create({
+    id: "creator",
+    title: "Creator Profile",
+    contexts: ["action"],
+  });
 });
 
 chrome.contextMenus.onClicked.addListener((info) => {
@@ -33,6 +39,10 @@ chrome.contextMenus.onClicked.addListener((info) => {
   } else if (info.menuItemId === "navigateGitHub") {
     chrome.tabs.create({
       url: "https://github.com/atj393/promt-save-reuse-chatgpt-and-gemini/wiki/Prompt-Save-Reuse:-ChatGPT-&-Gemini-%E2%80%90-User-Guide",
+    });
+  } else if (info.menuItemId === "creator") {
+    chrome.tabs.create({
+      url: "https://www.linkedin.com/in/atj393/",
     });
   }
 });
