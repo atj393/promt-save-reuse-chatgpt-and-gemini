@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Prompt Productivity Enhancer",
+  "version": "1.0",
+  "description": "Enhances productivity with generative AI platforms by managing text prompts.",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "icons": {
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Prompt Productivity Enhancer"
+  }
+}
