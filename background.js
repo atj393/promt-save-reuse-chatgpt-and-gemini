@@ -9,7 +9,7 @@ chrome.action.onClicked.addListener((tab) => {
     clickTimeout = setTimeout(() => {
       handleSingleClick(tab);
       clickTimeout = null;
-    }, 300); // Adjust the timeout duration as needed
+    }, 300);
   }
 });
 
@@ -22,18 +22,18 @@ chrome.runtime.onInstalled.addListener(() => {
 
   chrome.contextMenus.create({
     id: "navigateGitHub",
-    title: "Go to GitHub Page",
+    title: "How to use?",
     contexts: ["action"],
   });
 });
 
 chrome.contextMenus.onClicked.addListener((info) => {
   if (info.menuItemId === "clearData") {
-    chrome.storage.local.clear(() => {
-      console.log("All saved data cleared.");
-    });
+    chrome.storage.local.clear(() => {});
   } else if (info.menuItemId === "navigateGitHub") {
-    chrome.tabs.create({ url: "https://github.com/your-repo" });
+    chrome.tabs.create({
+      url: "https://github.com/atj393/promt-save-reuse-chatgpt-and-gemini/wiki/Prompt-Save-Reuse:-ChatGPT-&-Gemini-%E2%80%90-User-Guide",
+    });
   }
 });
 
@@ -62,13 +62,9 @@ function toggleInputStorage() {
   if (!inputField) return;
 
   if (inputFieldChatGPT && inputField.value.trim()) {
-    chrome.storage.local.set({ [url]: inputField.value.trim() }, () => {
-      console.log("Input text saved for ChatGPT.");
-    });
+    chrome.storage.local.set({ [url]: inputField.value.trim() }, () => {});
   } else if (inputFieldGemini && inputField.innerText.trim()) {
-    chrome.storage.local.set({ [url]: inputField.innerText.trim() }, () => {
-      console.log("Input text saved for Gemini.");
-    });
+    chrome.storage.local.set({ [url]: inputField.innerText.trim() }, () => {});
   } else {
     chrome.storage.local.get([url], (result) => {
       if (result[url]) {
@@ -77,7 +73,6 @@ function toggleInputStorage() {
         } else if (inputFieldGemini) {
           inputField.innerText = result[url];
         }
-        console.log("Input text retrieved.");
       }
     });
   }
@@ -104,7 +99,6 @@ function appendStoredText() {
         const event = new Event("input", { bubbles: true });
         inputField.dispatchEvent(event);
       }
-      console.log("Input text appended with an empty line.");
     }
   });
 }
