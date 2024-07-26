@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Prompt Productivity Enhancer",
+  "name": "Prompt Save Reuse: ChatGPT & Gemini",
   "version": "1.0",
-  "description": "Enhances productivity with generative AI platforms by managing text prompts.",
-  "permissions": ["storage", "activeTab", "scripting"],
+  "description": "Enhance your productivity with AI platforms by saving and reusing prompts. This extension allows you to save your input prompts and reuse them effortlessly in ChatGPT and Gemini. Single-click the extension icon to save or retrieve prompts, and double-click to append stored prompts with ease. Right-click for additional options such as clearing all saved data or visiting the GitHub page.",
+  "permissions": ["storage", "activeTab", "scripting", "contextMenus"],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": ["https://chatgpt.com/*", "https://gemini.google.com/*"],
       "js": ["content.js"]
     }
   ],
@@ -18,6 +18,6 @@
     "128": "icons/icon128.png"
   },
   "action": {
-    "default_title": "Prompt Productivity Enhancer"
+    "default_title": "Prompt Save Reuse"
   }
 }
