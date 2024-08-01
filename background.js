@@ -1,5 +1,11 @@
 let clickTimeout;
 
+/**
+ * Listens for a click on the extension icon and distinguishes between single and double clicks.
+ * A single click triggers the handleSingleClick function, while a double click triggers handleDoubleClick.
+ *
+ * @param {chrome.tabs.Tab} tab - The current active tab where the action is performed.
+ */
 chrome.action.onClicked.addListener((tab) => {
   if (clickTimeout) {
     clearTimeout(clickTimeout);
@@ -13,6 +19,10 @@ chrome.action.onClicked.addListener((tab) => {
   }
 });
 
+/**
+ * Sets up context menu items when the extension is installed.
+ * These menu items allow the user to clear saved data, navigate to a GitHub page, or view the creator's profile.
+ */
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "clearData",
@@ -28,11 +38,17 @@ chrome.runtime.onInstalled.addListener(() => {
 
   chrome.contextMenus.create({
     id: "creator",
-    title: "Creator Profile",
+    title: "Goto Developer Profile",
     contexts: ["action"],
   });
 });
 
+/**
+ * Handles clicks on context menu items by performing actions such as clearing saved data
+ * or opening specific URLs.
+ *
+ * @param {chrome.contextMenus.OnClickData} info - Information about the context menu click event.
+ */
 chrome.contextMenus.onClicked.addListener((info) => {
   if (info.menuItemId === "clearData") {
     chrome.storage.local.clear(() => {});
@@ -47,6 +63,13 @@ chrome.contextMenus.onClicked.addListener((info) => {
   }
 });
 
+/**
+ * Handles the action when the extension icon is single-clicked.
+ * It injects a script into the active tab that either saves the current input or
+ * retrieves and inserts saved text into the input field.
+ *
+ * @param {chrome.tabs.Tab} tab - The current active tab where the action is performed.
+ */
 function handleSingleClick(tab) {
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
@@ -54,6 +77,12 @@ function handleSingleClick(tab) {
   });
 }
 
+/**
+ * Handles the action when the extension icon is double-clicked.
+ * It injects a script into the active tab that appends the saved text to the existing content in the input field.
+ *
+ * @param {chrome.tabs.Tab} tab - The current active tab where the action is performed.
+ */
 function handleDoubleClick(tab) {
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
@@ -61,8 +90,14 @@ function handleDoubleClick(tab) {
   });
 }
 
+/**
+ * Toggles the input storage functionality by either saving the current input field text
+ * to local storage or retrieving and inserting saved text into the input field.
+ *
+ * This function is injected into the active tab and interacts directly with the DOM of the page.
+ */
 function toggleInputStorage() {
-  const inputFieldChatGPT = document.querySelector("input, textarea");
+  const inputFieldChatGPT = document.querySelector("#prompt-textarea");
   const inputFieldGemini = document.querySelector(
     '.ql-editor[contenteditable="true"]'
   );
@@ -81,15 +116,21 @@ function toggleInputStorage() {
         if (inputFieldChatGPT) {
           inputField.value = result[url];
         } else if (inputFieldGemini) {
-          inputField.innerText = result[url];
+          inputField.innerHTML = result[url];
         }
       }
     });
   }
 }
 
+/**
+ * Appends the stored text from local storage to the current content of the input field.
+ * It ensures that the input field content is updated and triggers an input event to reflect changes.
+ *
+ * This function is injected into the active tab and interacts directly with the DOM of the page.
+ */
 function appendStoredText() {
-  const inputFieldChatGPT = document.querySelector("input, textarea");
+  const inputFieldChatGPT = document.querySelector("#prompt-textarea");
   const inputFieldGemini = document.querySelector(
     '.ql-editor[contenteditable="true"]'
   );
