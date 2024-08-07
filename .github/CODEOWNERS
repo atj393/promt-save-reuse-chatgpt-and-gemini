@@ -1,7 +1,7 @@
 # This is a comment line
 
 # Specify owners for specific directories or files
-# Format: path/to/file @githubusername or @teamname
+# Format: path/to/file @atj393
 
 # Example: Assign the core team to all files
 * @core-team
