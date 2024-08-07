@@ -1,0 +1,17 @@
+# This is a comment line
+
+# Specify owners for specific directories or files
+# Format: path/to/file @githubusername or @teamname
+
+# Example: Assign the core team to all files
+* @core-team
+
+# Example: Assign a specific person to scripts in the /scripts/ directory
+/scripts/ @script-owner
+
+# Example: Assign multiple owners to specific files
+/docs/ @docs-owner @core-team
+README.md @core-owner
+
+# Example: Assign a team to a specific file extension
+*.js @js-team
