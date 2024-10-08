@@ -102,9 +102,12 @@ function insertText(inputField, text) {
   if (inputField.tagName === "TEXTAREA" || inputField.tagName === "INPUT") {
     inputField.value = `${text}\n\n`;
   } else {
-    inputField.innerHTML = `<p>${text}</p><p><br></p>`;
+    // Properly formatted HTML with <p> tags for each line of text
+    const formattedText = text.split('\n').map(line => `<p>${line}</p>`).join('');
+    inputField.innerHTML = formattedText + '<p><br></p>';  // Adding an extra empty paragraph for better formatting
   }
 }
+
 
 /**
  * Appends the given text to the current content of the input field.
@@ -117,9 +120,12 @@ function appendText(inputField, text) {
   if (inputField.tagName === "TEXTAREA" || inputField.tagName === "INPUT") {
     inputField.value += `\n\n${text}`;
   } else {
-    inputField.innerHTML += `<p><br></p><p>${text}</p>`;
+    // Properly formatted HTML to append text with <p> tags for each line
+    const formattedText = text.split('\n').map(line => `<p>${line}</p>`).join('');
+    inputField.innerHTML += '<p><br></p>' + formattedText;  // Adding a line break between existing and new content
   }
 }
+
 
 /**
  * Moves the cursor to the end of the content in the input field.
