@@ -1,3 +1,5 @@
+import { toggleInputStorage, appendStoredText } from './tests/toggleInputStorage.test.js'; 
+
 let clickTimeout;
 
 /**
@@ -81,13 +83,34 @@ function handleSingleClick(tab) {
  * Handles the action when the extension icon is double-clicked.
  * It injects a script into the active tab that appends the saved text to the existing content in the input field.
  *
- * @param{chrome.tabs.Tab}tab - The current active tab where the action is performed.  
+ * @param {chrome.tabs.Tab} tab - The current active tab where the action is performed.
  */
 function handleDoubleClick(tab) {
   chrome.scripting.executeScript({
     target: { tabId: tab.id },
     function: appendStoredText,
   });
+}
+
+/**
+ * Initializes the extension's user interface by adding a custom toolbar to the webpage.
+ * This toolbar allows the user to easily access the extension's features.
+ */
+function initializeExtensionUI() {
+  const toolbar = document.createElement("div");
+  toolbar.id = "extension-toolbar";
+  toolbar.style.position = "fixed";
+  toolbar.style.top = "0";
+  toolbar.style.left = "0";
+  toolbar.style.width = "100%";
+  toolbar.style.height = "50px";
+  toolbar.style.backgroundColor = "#333";
+  toolbar.style.color = "#fff";
+  toolbar.style.display = "flex";
+  toolbar.style.alignItems = "center";
+  toolbar.style.justifyContent = "center";
+  toolbar.innerText = "Extension Toolbar - Click to Access Features";
+  document.body.appendChild(toolbar);
 }
 
 /**
@@ -146,7 +169,7 @@ function appendStoredText() {
   chrome.storage.local.get([url], (result) => {
     if (result[url]) {
       if (inputFieldChatGPT) {
-        inputField.innerText += `\n\n ${ result[url] } ` ;
+        inputField.innerText += `\n\n ${result[url]}`;
         const event = new Event("input", { bubbles: true });
         inputField.dispatchEvent(event);
       } else if (inputFieldGemini) {
@@ -157,3 +180,11 @@ function appendStoredText() {
     }
   });
 }
+
+// Listen to tab creation and inject UI for extension
+chrome.tabs.onCreated.addListener((tab) => {
+  chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    function: initializeExtensionUI,
+  });
+});
