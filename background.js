@@ -110,7 +110,18 @@ function toggleInputStorage() {
     } else {
       chrome.storage.local.get([url], (result) => {
         if (result[url] == undefined) {
-          alert("Empty Input Field. Please type something in the search bar.");
+          // Notify the user that the input field is empty
+          if (Notification && Notification.permission !== "denied") {
+            const notification = new Notification("Prompt Save/Reuse", {
+              body: "Input field is empty. Please write something in the search bar to save it.",
+              icon: "icons/icon128.png"
+            });
+        
+            // Auto dismiss after the specified time
+            setTimeout(() => {
+              notification.close();
+            }, 5000);
+          }
         } else {
           inputField.innerText = result[url];
         }
