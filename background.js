@@ -98,28 +98,24 @@ function handleDoubleClick(tab) {
  */
 function toggleInputStorage() {
   const inputFieldChatGPT = document.querySelector("#prompt-textarea");
-  const inputFieldGemini = document.querySelector(
-    '.ql-editor[contenteditable="true"]'
-  );
+  const inputFieldGemini = document.querySelector('.ql-editor');
   const inputField = inputFieldChatGPT || inputFieldGemini;
   const url = window.location.href;
 
   if (!inputField) return;
 
-  if (inputFieldChatGPT && inputField.value.trim()) {
-    chrome.storage.local.set({ [url]: inputField.value.trim() }, () => {});
-  } else if (inputFieldGemini && inputField.innerText.trim()) {
-    chrome.storage.local.set({ [url]: inputField.innerText.trim() }, () => {});
-  } else {
-    chrome.storage.local.get([url], (result) => {
-      if (result[url]) {
-        if (inputFieldChatGPT) {
-          inputField.value = result[url];
-        } else if (inputFieldGemini) {
-          inputField.innerHTML = result[url];
+  if (inputField) {
+    if(inputField && inputField.innerText.trim()){
+      chrome.storage.local.set({ [url]: inputField.innerText.trim() }, () => {});
+    } else {
+      chrome.storage.local.get([url], (result) => {
+        if (result[url] == undefined) {
+          alert("Empty Input Field. Please type something in the search bar.");
+        } else {
+          inputField.innerText = result[url];
         }
-      }
-    });
+      });
+    }
   }
 }
 
