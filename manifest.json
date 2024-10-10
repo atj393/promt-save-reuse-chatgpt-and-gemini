@@ -3,7 +3,7 @@
     "name": "Prompt Save Reuse: ChatGPT & Gemini",
     "version": "2.0",
     "description": "Save and reuse prompts in ChatGPT and Gemini. Single-click to save/retrieve, double-click to append, right-click for more options. Now with improved UX and additional features.", // Updated description if necessary
-    "permissions": ["storage", "activeTab", "scripting", "contextMenus"],
+    "permissions": ["storage", "activeTab", "scripting", "contextMenus", "notifications"],
     "background": {
       "service_worker": "background.js"
     },
