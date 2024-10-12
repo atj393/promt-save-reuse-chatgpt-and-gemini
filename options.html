@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Options - Prompt Save Reuse</title>
+    <link rel="stylesheet" href="/options.css"> <!-- Link to your CSS file if needed -->
+    <script src="options.js" defer></script>
+</head>
+<body>
+    <h1>Extension Settings</h1>
+    <form id="options-form">
+        <div>
+            <label>
+                <input type="checkbox" id="auto-save" />
+                Enable Auto-Save
+            </label>
+        </div>
+        <div class="command-label">
+            <label for="custom-command">Custom Command:</label>
+            <input type="text" id="custom-command" placeholder="Type your custom command" />
+        </div>
+        <div class="theme-selector">
+            <label for="theme">Select Theme:</label>
+            <select id="theme">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </div>
+        <button type="submit">Save Settings</button>
+    </form>
+</body>
+</html>
