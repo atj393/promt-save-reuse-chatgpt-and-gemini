@@ -158,3 +158,36 @@ function setCaretToEnd(element) {
   selection.addRange(range);
   element.focus();
 }
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const inputField = document.querySelector(".ProseMirror[contenteditable='true']") || document.querySelector("#prompt-textarea");
+
+  if (inputField) {
+      const autoSaveEnabled = await getUserPreferences();
+
+      if (autoSaveEnabled) {
+          inputField.addEventListener("input", () => {
+              const userId = "user123"; // Replace with actual user ID or method to get it
+              const url = window.location.href;
+              const storageKey = `${userId}_${url}`; // Create a unique key for each user and URL
+
+              // Save the input value
+              chrome.storage.local.set({ [storageKey]: inputField.innerText }, () => {
+                console.log("Data saved under key:", storageKey, "Value:", inputField.innerText);
+            });
+        });
+      }
+  }else {
+    console.error("Input field not found.");
+}
+});
+
+// Function to get user preferences from storage
+function getUserPreferences() {
+  return new Promise((resolve) => {
+      chrome.storage.local.get(["autoSaveEnabled"], (result) => {
+          console.log("Auto-save preference loaded:", result.autoSaveEnabled);
+          resolve(result.autoSaveEnabled);
+      });
+  });
+}
