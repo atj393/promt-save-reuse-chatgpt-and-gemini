@@ -12,6 +12,15 @@
  * - Managing the cursor position and content display within the input field.
  */
 
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), wait);
+  };
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const inputFieldChatGPT =
     document.querySelector(".ProseMirror[contenteditable='true']") ||
@@ -24,23 +33,31 @@ document.addEventListener("DOMContentLoaded", () => {
   if (inputField) {
     let clickTimeout;
 
-    inputField.addEventListener("click", (event) => {
-      if (clickTimeout) {
-        clearTimeout(clickTimeout);
-        clickTimeout = null;
-        handleDoubleClick(inputField);
-      } else {
-        clickTimeout = setTimeout(() => {
-          handleSingleClick(inputField);
+    
+    inputField.addEventListener(
+      "click",
+      debounce((event) => {
+        if (clickTimeout) {
+          clearTimeout(clickTimeout);
           clickTimeout = null;
-        }, 300);
-      }
-    });
+          handleDoubleClick(inputField);
+        } else {
+          clickTimeout = setTimeout(() => {
+            handleSingleClick(inputField);
+            clickTimeout = null;
+          }, 300);
+        }
+      }, 100) 
+    );
 
-    inputField.addEventListener("contextmenu", (event) => {
-      event.preventDefault();
-      chrome.runtime.sendMessage({ action: "showContextMenu" });
-    });
+   
+    inputField.addEventListener(
+      "contextmenu",
+      debounce((event) => {
+        event.preventDefault();
+        chrome.runtime.sendMessage({ action: "showContextMenu" });
+      }, 100) 
+    );
   }
 });
 
