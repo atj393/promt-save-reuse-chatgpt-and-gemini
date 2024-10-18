@@ -81,7 +81,7 @@ function handleSingleClick(tab) {
  * Handles the action when the extension icon is double-clicked.
  * It injects a script into the active tab that appends the saved text to the existing content in the input field.
  *
- * @param {chrome.tabs.Tab} tab - The current active tab where the action is performed.
+ * @param{chrome.tabs.Tab}tab - The current active tab where the action is performed.  
  */
 function handleDoubleClick(tab) {
   chrome.scripting.executeScript({
@@ -97,8 +97,9 @@ function handleDoubleClick(tab) {
  * This function is injected into the active tab and interacts directly with the DOM of the page.
  */
 function toggleInputStorage() {
-  const inputFieldChatGPT = document.querySelector("#prompt-textarea");
-  const inputFieldGemini = document.querySelector('.ql-editor');
+  const inputFieldChatGPT = document.querySelector(".ProseMirror[contenteditable='true']") || document.querySelector("#prompt-textarea");
+  const inputFieldGemini = document.querySelector('.ql-editor[contenteditable="true"]');
+
   const inputField = inputFieldChatGPT || inputFieldGemini;
   const url = window.location.href;
 
@@ -140,7 +141,9 @@ function toggleInputStorage() {
  * This function is injected into the active tab and interacts directly with the DOM of the page.
  */
 function appendStoredText() {
-  const inputFieldChatGPT = document.querySelector("#prompt-textarea");
+  const inputFieldChatGPT =
+    document.querySelector(".ProseMirror[contenteditable='true']") ||
+    document.querySelector("#prompt-textarea");
   const inputFieldGemini = document.querySelector(
     '.ql-editor[contenteditable="true"]'
   );
@@ -152,7 +155,7 @@ function appendStoredText() {
   chrome.storage.local.get([url], (result) => {
     if (result[url]) {
       if (inputFieldChatGPT) {
-        inputField.value += `\n\n${result[url]}`;
+        inputField.innerText += `\n\n ${ result[url] } ` ;
         const event = new Event("input", { bubbles: true });
         inputField.dispatchEvent(event);
       } else if (inputFieldGemini) {
