@@ -111,10 +111,13 @@ function toggleInputStorage() {
       chrome.storage.local.get([url], (result) => {
         if (result[url] == undefined) {
           // Notify the user that the input field is empty
-          if (Notification && Notification.permission !== "denied") {
+          if (Notification.permission === "denied") {
+            alert("You have blocked your browser notifications for this website.");
+          } else if (Notification.permission === "default") {
+            Notification.requestPermission((status) => {});
+          } else {
             const notification = new Notification("Prompt Save/Reuse", {
               body: "Input field is empty. Please write something in the search bar to save it.",
-              icon: "icons/icon128.png"
             });
         
             // Auto dismiss after the specified time
