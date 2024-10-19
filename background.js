@@ -97,31 +97,40 @@ function handleDoubleClick(tab) {
  * This function is injected into the active tab and interacts directly with the DOM of the page.
  */
 function toggleInputStorage() {
-  const inputFieldChatGPT =
-    document.querySelector(".ProseMirror[contenteditable='true']") ||
-    document.querySelector("#prompt-textarea");
-  const inputFieldGemini = document.querySelector(
-    '.ql-editor[contenteditable="true"]'
-  );
+  const inputFieldChatGPT = document.querySelector(".ProseMirror[contenteditable='true']") || document.querySelector("#prompt-textarea");
+  const inputFieldGemini = document.querySelector('.ql-editor[contenteditable="true"]');
+
   const inputField = inputFieldChatGPT || inputFieldGemini;
   const url = window.location.href;
 
   if (!inputField) return;
 
-  if (inputFieldChatGPT && inputField.innerText.trim()) {
-    chrome.storage.local.set({ [url]: inputField.innerText.trim() }, () => {});
-  } else if (inputFieldGemini && inputField.innerText.trim()) {
-    chrome.storage.local.set({ [url]: inputField.innerText.trim() }, () => {});
-  } else {
-    chrome.storage.local.get([url], (result) => {
-      if (result[url]) {
-        if (inputFieldChatGPT) {
+  if (inputField) {
+    if(inputField && inputField.innerText.trim()){
+      chrome.storage.local.set({ [url]: inputField.innerText.trim() }, () => {});
+    } else {
+      chrome.storage.local.get([url], (result) => {
+        if (result[url] == undefined) {
+          // Notify the user that the input field is empty
+          if (Notification.permission === "denied") {
+            alert("You have blocked your browser notifications for this website.");
+          } else if (Notification.permission === "default") {
+            Notification.requestPermission((status) => {});
+          } else {
+            const notification = new Notification("Prompt Save/Reuse", {
+              body: "Input field is empty. Please write something in the search bar to save it.",
+            });
+        
+            // Auto dismiss after the specified time
+            setTimeout(() => {
+              notification.close();
+            }, 5000);
+          }
+        } else {
           inputField.innerText = result[url];
-        } else if (inputFieldGemini) {
-          inputField.innerHTML = result[url];
         }
-      }
-    });
+      });
+    }
   }
 }
 
