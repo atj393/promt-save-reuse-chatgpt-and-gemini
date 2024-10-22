@@ -7,6 +7,7 @@ let clickTimeout;
  * @param {chrome.tabs.Tab} tab - The current active tab where the action is performed.
  */
 chrome.action.onClicked.addListener((tab) => {
+  console.log("tab triggered", tab);
   if (clickTimeout) {
     clearTimeout(clickTimeout);
     clickTimeout = null;
@@ -60,6 +61,41 @@ chrome.contextMenus.onClicked.addListener((info) => {
     chrome.tabs.create({
       url: "https://www.linkedin.com/in/atj393/",
     });
+  }
+});
+
+/**
+ * Listens for keyboard command shortcuts and triggers specific actions based on the command.
+ * The available commands include saving or appending data, which are executed in the active tab.
+ *
+ * @param {string} command - The command identifier triggered by the user (e.g., "save-data", "append-data").
+ *
+ * The function responds to the following commands:
+ * - "save-data": Executes a script in the current active tab to store the user's input using `toggleInputStorage`.
+ * - "append-data": Executes a script in the current active tab to append stored input using `appendStoredText`.
+ *
+ * If an unrecognized command is triggered, it logs an "Unknown command" message to the console.
+ */
+chrome.commands.onCommand.addListener((command) => {
+  switch (command) {
+    case "save-data":
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.scripting.executeScript({
+          target: { tabId: tabs[0].id },
+          function: toggleInputStorage,
+        });
+      });
+      break;
+    case "append-data":
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.scripting.executeScript({
+          target: { tabId: tabs[0].id },
+          function: appendStoredText,
+        });
+      });
+      break;
+    default:
+      console.log("Unknown command:", command);
   }
 });
 
