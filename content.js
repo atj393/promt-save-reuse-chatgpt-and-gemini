@@ -12,31 +12,52 @@
  * - Managing the cursor position and content display within the input field.
  */
 
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), wait);
+  };
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  const inputField =
-    document.querySelector("#prompt-textarea") ||
-    document.querySelector('.ql-editor[contenteditable="true"]');
+  const inputFieldChatGPT =
+    document.querySelector(".ProseMirror[contenteditable='true']") ||
+    document.querySelector("#prompt-textarea");
+  const inputFieldGemini = document.querySelector(
+    '.ql-editor[contenteditable="true"]'
+  );
+  const inputField = inputFieldChatGPT || inputFieldGemini;
 
   if (inputField) {
     let clickTimeout;
 
-    inputField.addEventListener("click", (event) => {
-      if (clickTimeout) {
-        clearTimeout(clickTimeout);
-        clickTimeout = null;
-        handleDoubleClick(inputField);
-      } else {
-        clickTimeout = setTimeout(() => {
-          handleSingleClick(inputField);
+    
+    inputField.addEventListener(
+      "click",
+      debounce((event) => {
+        if (clickTimeout) {
+          clearTimeout(clickTimeout);
           clickTimeout = null;
-        }, 300);
-      }
-    });
+          handleDoubleClick(inputField);
+        } else {
+          clickTimeout = setTimeout(() => {
+            handleSingleClick(inputField);
+            clickTimeout = null;
+          }, 300);
+        }
+      }, 100) 
+    );
 
-    inputField.addEventListener("contextmenu", (event) => {
-      event.preventDefault();
-      chrome.runtime.sendMessage({ action: "showContextMenu" });
-    });
+   
+    inputField.addEventListener(
+      "contextmenu",
+      debounce((event) => {
+        event.preventDefault();
+        chrome.runtime.sendMessage({ action: "showContextMenu" });
+      }, 100) 
+    );
   }
 });
 
@@ -110,7 +131,7 @@ function insertText(inputField, text) {
  * Appends the given text to the current content of the input field.
  * For textareas, it ensures proper formatting by adding new lines.
  *
- * @param {HTMLElement} inputField - The input field element where the text will be appended.
+ * @param{HTMLElement}inputField - The input field element where the text will be appended.  
  * @param {string} text - The text to append to the input field.
  */
 function appendText(inputField, text) {
