@@ -7,7 +7,6 @@ let clickTimeout;
  * @param {chrome.tabs.Tab} tab - The current active tab where the action is performed.
  */
 chrome.action.onClicked.addListener((tab) => {
-  console.log("tab triggered", tab);
   if (clickTimeout) {
     clearTimeout(clickTimeout);
     clickTimeout = null;
