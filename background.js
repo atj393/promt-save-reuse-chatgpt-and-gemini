@@ -64,6 +64,41 @@ chrome.contextMenus.onClicked.addListener((info) => {
 });
 
 /**
+ * Listens for keyboard command shortcuts and triggers specific actions based on the command.
+ * The available commands include saving or appending data, which are executed in the active tab.
+ *
+ * @param {string} command - The command identifier triggered by the user (e.g., "save-data", "append-data").
+ *
+ * The function responds to the following commands:
+ * - "save-data": Executes a script in the current active tab to store the user's input using `toggleInputStorage`.
+ * - "append-data": Executes a script in the current active tab to append stored input using `appendStoredText`.
+ *
+ * If an unrecognized command is triggered, it logs an "Unknown command" message to the console.
+ */
+chrome.commands.onCommand.addListener((command) => {
+  switch (command) {
+    case "save-data":
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.scripting.executeScript({
+          target: { tabId: tabs[0].id },
+          function: toggleInputStorage,
+        });
+      });
+      break;
+    case "append-data":
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.scripting.executeScript({
+          target: { tabId: tabs[0].id },
+          function: appendStoredText,
+        });
+      });
+      break;
+    default:
+      console.log("Unknown command:", command);
+  }
+});
+
+/**
  * Handles the action when the extension icon is single-clicked.
  * It injects a script into the active tab that either saves the current input or
  * retrieves and inserts saved text into the input field.
