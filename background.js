@@ -138,7 +138,12 @@ function toggleInputStorage() {
   const inputField = inputFieldChatGPT || inputFieldGemini;
   const url = window.location.href;
 
-  if (!inputField) return;
+  if (!inputField) {
+    // Log error and notify user via popup
+    console.error("No input!!!");
+    displayPopup("No Text found. Add text!!!!");
+    return;
+  }
 
   if (inputField) {
     if(inputField && inputField.innerText.trim()){
@@ -185,12 +190,17 @@ function appendStoredText() {
   const inputField = inputFieldChatGPT || inputFieldGemini;
   const url = window.location.href;
 
-  if (!inputField) return;
+  if (!inputField) {
+    // Log error and notify user via popup
+    console.error("No input field found on the page.");
+    displayPopup("No input field found on this page.");
+    return;
+  }
 
   chrome.storage.local.get([url], (result) => {
     if (result[url]) {
       if (inputFieldChatGPT) {
-        inputField.innerText += `\n\n ${ result[url] } ` ;
+        inputField.innerText += `\n\n ${result[url]}`;
         const event = new Event("input", { bubbles: true });
         inputField.dispatchEvent(event);
       } else if (inputFieldGemini) {
@@ -200,4 +210,40 @@ function appendStoredText() {
       }
     }
   });
+}
+
+
+function displayPopup(message) {
+  const css = `
+    #error-popup {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background-color: #f44336;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 14px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      z-index: 9999;
+      display: none;
+    }
+  `;
+
+  const html = `<div id="error-popup">${message}</div>`;
+  
+  const style = document.createElement("style");
+  style.innerHTML = css;
+  document.head.appendChild(style);
+
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  document.body.appendChild(div);
+
+  // Show the popup and auto-hide it after 4 seconds
+  const popup = document.getElementById("error-popup");
+  popup.style.display = "block";
+  setTimeout(() => {
+    popup.style.display = "none";
+  }, 4000);
 }
