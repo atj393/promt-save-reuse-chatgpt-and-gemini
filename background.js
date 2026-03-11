@@ -51,7 +51,7 @@ chrome.runtime.onInstalled.addListener(() => {
  */
 chrome.contextMenus.onClicked.addListener((info) => {
   if (info.menuItemId === "clearData") {
-    chrome.storage.local.clear(() => {});
+    chrome.storage.sync.clear(() => {});
   } else if (info.menuItemId === "navigateGitHub") {
     chrome.tabs.create({
       url: "https://github.com/atj393/promt-save-reuse-chatgpt-and-gemini/wiki/Prompt-Save-Reuse:-ChatGPT-&-Gemini-%E2%80%90-User-Guide",
@@ -132,40 +132,50 @@ function handleDoubleClick(tab) {
  * This function is injected into the active tab and interacts directly with the DOM of the page.
  */
 function toggleInputStorage() {
-  const inputFieldChatGPT = document.querySelector(".ProseMirror[contenteditable='true']") || document.querySelector("#prompt-textarea");
-  const inputFieldGemini = document.querySelector('.ql-editor[contenteditable="true"]');
-
-  const inputField = inputFieldChatGPT || inputFieldGemini;
+  const inputField =
+    document.querySelector(".ProseMirror[contenteditable='true']") ||
+    document.querySelector("#prompt-textarea") ||
+    document.querySelector('.ql-editor[contenteditable="true"]') ||
+    document.querySelector('#ask-input[contenteditable="true"]') ||
+    document.querySelector("textarea.w-full.bg-transparent") ||
+    document.querySelector('textarea[placeholder="Message DeepSeek"]');
   const url = window.location.href;
 
   if (!inputField) return;
 
-  if (inputField) {
-    if(inputField && inputField.innerText.trim()){
-      chrome.storage.local.set({ [url]: inputField.innerText.trim() }, () => {});
-    } else {
-      chrome.storage.local.get([url], (result) => {
-        if (result[url] == undefined) {
-          // Notify the user that the input field is empty
-          if (Notification.permission === "denied") {
-            alert("You have blocked your browser notifications for this website.");
-          } else if (Notification.permission === "default") {
-            Notification.requestPermission((status) => {});
-          } else {
-            const notification = new Notification("Prompt Save/Reuse", {
-              body: "Input field is empty. Please write something in the search bar to save it.",
-            });
-        
-            // Auto dismiss after the specified time
-            setTimeout(() => {
-              notification.close();
-            }, 5000);
-          }
+  const isTextarea = inputField.tagName === "TEXTAREA" || inputField.tagName === "INPUT";
+  const currentText = isTextarea ? inputField.value.trim() : inputField.innerText.trim();
+
+  if (currentText) {
+    chrome.storage.sync.set({ [url]: currentText }, () => {});
+  } else {
+    chrome.storage.sync.get([url], (result) => {
+      if (result[url] == undefined) {
+        if (Notification.permission === "denied") {
+          alert("You have blocked your browser notifications for this website.");
+        } else if (Notification.permission === "default") {
+          Notification.requestPermission((status) => {});
         } else {
-          inputField.innerText = result[url];
+          const notification = new Notification("Prompt Save/Reuse", {
+            body: "Input field is empty. Please write something in the search bar to save it.",
+          });
+          setTimeout(() => notification.close(), 5000);
         }
-      });
-    }
+      } else {
+        if (isTextarea) {
+          const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+          nativeInputValueSetter.call(inputField, result[url]);
+          inputField.dispatchEvent(new Event("input", { bubbles: true }));
+        } else if (inputField.dataset.lexicalEditor === "true") {
+          inputField.focus();
+          document.execCommand("selectAll", false, null);
+          document.execCommand("insertText", false, result[url]);
+        } else {
+          inputField.innerHTML = `<p>${result[url]}</p><p><br></p>`;
+          inputField.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      }
+    });
   }
 }
 
@@ -176,27 +186,32 @@ function toggleInputStorage() {
  * This function is injected into the active tab and interacts directly with the DOM of the page.
  */
 function appendStoredText() {
-  const inputFieldChatGPT =
+  const inputField =
     document.querySelector(".ProseMirror[contenteditable='true']") ||
-    document.querySelector("#prompt-textarea");
-  const inputFieldGemini = document.querySelector(
-    '.ql-editor[contenteditable="true"]'
-  );
-  const inputField = inputFieldChatGPT || inputFieldGemini;
+    document.querySelector("#prompt-textarea") ||
+    document.querySelector('.ql-editor[contenteditable="true"]') ||
+    document.querySelector('#ask-input[contenteditable="true"]') ||
+    document.querySelector("textarea.w-full.bg-transparent") ||
+    document.querySelector('textarea[placeholder="Message DeepSeek"]');
   const url = window.location.href;
 
   if (!inputField) return;
 
-  chrome.storage.local.get([url], (result) => {
+  chrome.storage.sync.get([url], (result) => {
     if (result[url]) {
-      if (inputFieldChatGPT) {
-        inputField.innerText += `\n\n ${ result[url] } ` ;
-        const event = new Event("input", { bubbles: true });
-        inputField.dispatchEvent(event);
-      } else if (inputFieldGemini) {
+      if (inputField.tagName === "TEXTAREA" || inputField.tagName === "INPUT") {
+        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+        nativeInputValueSetter.call(inputField, inputField.value + `\n\n${result[url]}`);
+        inputField.dispatchEvent(new Event("input", { bubbles: true }));
+      } else if (inputField.dataset.lexicalEditor === "true") {
+        inputField.focus();
+        const sel = window.getSelection();
+        sel.selectAllChildren(inputField);
+        sel.collapseToEnd();
+        document.execCommand("insertText", false, `\n\n${result[url]}`);
+      } else {
         inputField.innerHTML += `<p><br></p><p>${result[url]}</p>`;
-        const event = new Event("input", { bubbles: true });
-        inputField.dispatchEvent(event);
+        inputField.dispatchEvent(new Event("input", { bubbles: true }));
       }
     }
   });

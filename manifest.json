@@ -1,15 +1,23 @@
 {
   "manifest_version": 3,
-  "name": "Prompt Save Reuse: ChatGPT & Gemini",
-  "version": "2.0",
-  "description": "Save and reuse prompts in ChatGPT and Gemini. Single-click to save/retrieve, double-click to append, right-click for more options. Now with improved UX and additional features.", // Updated description if necessary
+  "name": "Prompt Save Reuse: ChatGPT, Gemini & More",
+  "version": "3.0",
+  "description": "Save and reuse prompts across ChatGPT, Gemini, Claude, Perplexity, Grok, Mistral, and DeepSeek. Single-click to save/retrieve, double-click to append. Syncs across devices.",
   "permissions": ["storage", "activeTab", "scripting", "contextMenus"],
   "background": {
     "service_worker": "background.js"
   },
   "content_scripts": [
     {
-      "matches": ["https://chatgpt.com/*", "https://gemini.google.com/*"],
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*",
+        "https://claude.ai/*",
+        "https://www.perplexity.ai/*",
+        "https://grok.com/*",
+        "https://chat.mistral.ai/*",
+        "https://chat.deepseek.com/*"
+      ],
       "js": ["content.js"]
     }
   ],
