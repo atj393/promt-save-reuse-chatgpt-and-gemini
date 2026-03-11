@@ -21,45 +21,64 @@ function debounce(func, wait) {
   };
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  const inputFieldChatGPT =
+function findInputField() {
+  return (
     document.querySelector(".ProseMirror[contenteditable='true']") ||
-    document.querySelector("#prompt-textarea");
-  const inputFieldGemini = document.querySelector(
-    '.ql-editor[contenteditable="true"]'
+    document.querySelector("#prompt-textarea") ||
+    document.querySelector('.ql-editor[contenteditable="true"]') ||
+    document.querySelector('#ask-input[contenteditable="true"]') ||
+    document.querySelector("textarea.w-full.bg-transparent") ||
+    document.querySelector('textarea[placeholder="Message DeepSeek"]')
   );
-  const inputField = inputFieldChatGPT || inputFieldGemini;
+}
 
-  if (inputField) {
-    let clickTimeout;
+function attachListeners(inputField) {
+  let clickTimeout;
 
-    
-    inputField.addEventListener(
-      "click",
-      debounce((event) => {
-        if (clickTimeout) {
-          clearTimeout(clickTimeout);
+  inputField.addEventListener(
+    "click",
+    debounce((event) => {
+      if (clickTimeout) {
+        clearTimeout(clickTimeout);
+        clickTimeout = null;
+        handleDoubleClick(inputField);
+      } else {
+        clickTimeout = setTimeout(() => {
+          handleSingleClick(inputField);
           clickTimeout = null;
-          handleDoubleClick(inputField);
-        } else {
-          clickTimeout = setTimeout(() => {
-            handleSingleClick(inputField);
-            clickTimeout = null;
-          }, 300);
-        }
-      }, 100) 
-    );
+        }, 300);
+      }
+    }, 100)
+  );
 
-   
-    inputField.addEventListener(
-      "contextmenu",
-      debounce((event) => {
-        event.preventDefault();
-        chrome.runtime.sendMessage({ action: "showContextMenu" });
-      }, 100) 
-    );
+  inputField.addEventListener(
+    "contextmenu",
+    debounce((event) => {
+      event.preventDefault();
+      chrome.runtime.sendMessage({ action: "showContextMenu" });
+    }, 100)
+  );
+}
+
+function initWithObserver() {
+  const existing = findInputField();
+  if (existing) {
+    attachListeners(existing);
+    return;
   }
-});
+
+  const observer = new MutationObserver(() => {
+    const inputField = findInputField();
+    if (inputField) {
+      observer.disconnect();
+      attachListeners(inputField);
+    }
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
+document.addEventListener("DOMContentLoaded", initWithObserver);
 
 /**
  * Handles the single click event by retrieving the saved text from local storage
@@ -70,15 +89,21 @@ document.addEventListener("DOMContentLoaded", () => {
  */
 function handleSingleClick(inputField) {
   const url = window.location.href;
+  const currentText =
+    inputField.tagName === "TEXTAREA" || inputField.tagName === "INPUT"
+      ? inputField.value.trim()
+      : inputField.innerText.trim();
 
-  chrome.storage.local.get([url], (result) => {
-    if (result[url]) {
-      insertText(inputField, result[url]);
-      moveCursorToEnd(inputField);
-    } else {
-      saveCurrentInput(inputField, url);
-    }
-  });
+  if (currentText) {
+    saveCurrentInput(inputField, url);
+  } else {
+    chrome.storage.sync.get([url], (result) => {
+      if (result[url]) {
+        insertText(inputField, result[url]);
+        moveCursorToEnd(inputField);
+      }
+    });
+  }
 }
 
 /**
@@ -90,7 +115,7 @@ function handleSingleClick(inputField) {
 function handleDoubleClick(inputField) {
   const url = window.location.href;
 
-  chrome.storage.local.get([url], (result) => {
+  chrome.storage.sync.get([url], (result) => {
     if (result[url]) {
       appendText(inputField, result[url]);
     }
@@ -109,7 +134,7 @@ function saveCurrentInput(inputField, url) {
       ? inputField.value
       : inputField.innerText;
 
-  chrome.storage.local.set({ [url]: text });
+  chrome.storage.sync.set({ [url]: text });
 }
 
 /**
@@ -119,11 +144,26 @@ function saveCurrentInput(inputField, url) {
  * @param {HTMLElement} inputField - The input field element where the text will be inserted.
  * @param {string} text - The text to insert into the input field.
  */
+function setNativeValue(inputField, text) {
+  const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+  nativeInputValueSetter.call(inputField, text);
+  inputField.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function insertTextLexical(inputField, text) {
+  inputField.focus();
+  document.execCommand("selectAll", false, null);
+  document.execCommand("insertText", false, text);
+}
+
 function insertText(inputField, text) {
   if (inputField.tagName === "TEXTAREA" || inputField.tagName === "INPUT") {
-    inputField.value = `${text}\n\n`;
+    setNativeValue(inputField, `${text}\n\n`);
+  } else if (inputField.dataset.lexicalEditor === "true") {
+    insertTextLexical(inputField, text);
   } else {
     inputField.innerHTML = `<p>${text}</p><p><br></p>`;
+    inputField.dispatchEvent(new Event("input", { bubbles: true }));
   }
 }
 
@@ -136,7 +176,13 @@ function insertText(inputField, text) {
  */
 function appendText(inputField, text) {
   if (inputField.tagName === "TEXTAREA" || inputField.tagName === "INPUT") {
-    inputField.value += `\n\n${text}`;
+    setNativeValue(inputField, inputField.value + `\n\n${text}`);
+  } else if (inputField.dataset.lexicalEditor === "true") {
+    inputField.focus();
+    const sel = window.getSelection();
+    sel.selectAllChildren(inputField);
+    sel.collapseToEnd();
+    document.execCommand("insertText", false, `\n\n${text}`);
   } else {
     inputField.innerHTML += `<p><br></p><p>${text}</p>`;
   }
