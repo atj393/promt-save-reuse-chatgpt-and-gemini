@@ -80,7 +80,16 @@ Make sure to check out the issues labeled with `good-first-issue` and `hacktober
 If you have any questions or want to discuss contributions, feel free to reach out:
 
 - Open an issue on GitHub
-- Connect with us on LinkedIn: [Your LinkedIn Profile](#)
+- Connect on LinkedIn: [linkedin.com/in/atj393](https://www.linkedin.com/in/atj393/)
 
 ## License
-Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+
+This project uses a **custom license**, not MIT. See [license](license) for the full text.
+
+In short, it grants the right to use, modify and publish changes **for the purpose of
+contributing to this project**, and requires derivative works to keep the same terms. It
+expressly prohibits private use, commercial use, sublicensing, and redistributing the software
+as-is without modification.
+
+If you need terms that permit private or commercial use, open an issue and ask before relying
+on the code.
