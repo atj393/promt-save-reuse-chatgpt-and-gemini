@@ -93,8 +93,8 @@ after a route change without a page reload.
 
 **Storage keyed by URL.** One saved prompt per conversation, in `chrome.storage.sync` rather
 than `local`, so it follows the browser profile to other machines. The trade-off is the sync
-quota: `chrome.storage.sync` caps individual items at roughly 8 KB, and a very long prompt will
-not save.
+quota: `chrome.storage.sync` enforces a per-item size limit, and a long enough prompt will not
+save.
 
 ## Known limitations
 
@@ -102,7 +102,7 @@ not save.
   stops matching and the extension goes quiet on that site until the selector list is updated.
 - **A failed save is silent.** If no input field is found, nothing tells the user. This is
   tracked in [issue #13](https://github.com/atj393/promt-save-reuse-chatgpt-and-gemini/issues/13).
-- **`chrome.storage.sync` has quotas.** Long prompts can exceed the per-item limit.
+- **`chrome.storage.sync` has quotas.** A long enough prompt exceeds the per-item size limit and does not save.
 - **Single-click actions carry a 300 ms delay** by design, as described above.
 - **No automated tests.** Adding them is tracked in issues
   [#8](https://github.com/atj393/promt-save-reuse-chatgpt-and-gemini/issues/8) and
