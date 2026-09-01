@@ -12,8 +12,9 @@
 [![Version](https://img.shields.io/badge/version-3.0-informational)](manifest.json)
 [![License](https://img.shields.io/badge/license-custom-orange)](license)
 
-<video src="https://github.com/atj393/promt-save-reuse-chatgpt-and-gemini/raw/main/docs/assets/brag.mp4" poster="https://github.com/atj393/promt-save-reuse-chatgpt-and-gemini/raw/main/docs/assets/brag.jpg" controls width="720">
-</video>
+[<img src="docs/assets/brag.jpg" width="720" alt="Prompt Save Reuse launch video" />](docs/assets/brag.mp4)
+
+▶ Watch the launch video
 
 </div>
 
