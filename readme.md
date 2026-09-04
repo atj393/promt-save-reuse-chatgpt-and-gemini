@@ -12,9 +12,7 @@
 [![Version](https://img.shields.io/badge/version-3.0-informational)](manifest.json)
 [![License](https://img.shields.io/badge/license-custom-orange)](license)
 
-[<img src="docs/assets/brag.jpg" width="720" alt="Prompt Save Reuse launch video" />](docs/assets/brag.mp4)
-
-▶ Watch the launch video
+https://github.com/user-attachments/assets/c1b3a812-9895-4b07-bb68-ae135902e74d
 
 </div>
 
